@@ -11,7 +11,7 @@ import 'package:flutter/foundation.dart';
 List<SampleDto> parsePhotos(String responseBody) {
   print("parsing $responseBody");
   final parsed = jsonDecode(responseBody).cast<Map<String, dynamic>>();
-  print("parsed $parsed");
+  print("parsed ${jsonDecode(responseBody)}");
   return parsed.map<SampleDto>((json) => SampleDto.fromJson(json)).toList();
 }
 
@@ -22,18 +22,12 @@ class SampleApiClient {
 
   Future<List<SampleDto>> fetch() async {
     final Response<String> response = await _dio.request("/photos");
-    // final response = await _httpClient
-    //     .get(Uri.parse("https://jsonplaceholder.typicode.com/photos"));
-    print("HELLO");
     // return JsonExtensions.parseObjectsCompute<SampleDto>(
     //   JsonParser(
     //     responseBody: response.data.toString(),
     //     fromJson: (json) => SampleDto.fromJson(json),
     //   ),
     // );
-    // var test = compute(parsePhotos, response.data.toString());
-    var test = parsePhotos(response.data.orEmpty());
-    print("HELLO 2 $test");
-    return test;
+    return compute(parsePhotos, response.data.toString());
   }
 }
