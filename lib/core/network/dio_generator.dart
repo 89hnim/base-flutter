@@ -16,8 +16,8 @@ class DioGenerator {
   static Dio sampleDio = Dio()
     ..options.baseUrl = _baseUrlSample
     ..options.connectTimeout = 30000
-    ..options.receiveTimeout = 30000
-    ..httpClientAdapter = _http2adapter;
+    ..options.receiveTimeout = 30000;
+    // ..httpClientAdapter = _http2adapter;
     // ..interceptors.add(_prettyInterceptor);
 
   static final Interceptor _prettyInterceptor = PrettyDioLogger(
