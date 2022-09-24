@@ -1,31 +1,33 @@
-import 'package:json_annotation/json_annotation.dart';
 import 'package:base_flutter/data/models/sample_model.dart';
 import 'package:base_flutter/utils/string_ext.dart';
+import 'package:equatable/equatable.dart';
+import 'package:json_annotation/json_annotation.dart';
 
 part 'sample_dto.g.dart';
 
 @JsonSerializable()
-class SampleDto {
+class SampleDto extends Equatable {
   @JsonKey(name: 'id')
   final int? id;
   @JsonKey(name: 'albumId')
   final int? albumId;
-  // @JsonKey(name: 'title')
-  // final String? title;
-  // @JsonKey(name: 'url')
-  // final String? url;
-  // @JsonKey(name: 'thumbnailUrl')
-  // final String? thumbnailUrl;
+  @JsonKey(name: 'title')
+  final String? title;
+  @JsonKey(name: 'url')
+  final String? url;
+  @JsonKey(name: 'thumbnailUrl')
+  final String? thumbnailUrl;
 
-  SampleDto({
-    this.id,
-    this.albumId,
-  });
+  const SampleDto(
+      {this.id, this.albumId, this.title, this.url, this.thumbnailUrl});
 
   factory SampleDto.fromJson(Map<String, dynamic> json) =>
       _$SampleDtoFromJson(json);
 
   Map<String, dynamic> toJson() => _$SampleDtoToJson(this);
+
+  @override
+  List<Object?> get props => [id, albumId, title, url, thumbnailUrl];
 }
 
 extension _Mapper on SampleDto {
@@ -34,9 +36,9 @@ extension _Mapper on SampleDto {
     return SampleModel(
       id: id!,
       albumId: albumId!,
-      title: "title.orEmpty()",
-      url: "url.orEmpty()",
-      thumbnailUrl: "thumbnailUrl.orEmpty()",
+      title: title.orEmpty(),
+      url: url.orEmpty(),
+      thumbnailUrl: thumbnailUrl.orEmpty(),
     );
   }
 }

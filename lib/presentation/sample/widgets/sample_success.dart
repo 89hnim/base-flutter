@@ -3,15 +3,20 @@ import 'package:base_flutter/presentation/sample/logic/sample_event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class SampleEmpty extends StatelessWidget {
-  const SampleEmpty({super.key});
+class SampleSuccess extends StatelessWidget {
+  const SampleSuccess({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Text('There is no data at all', style: TextStyle(fontSize: 16)),
+        const Text('Fetch data success', style: TextStyle(fontSize: 16)),
+        Builder(builder: (context) {
+          final samples =
+              context.select((SampleBloc bloc) => bloc.state.samples);
+          return Text(samples.toString());
+        }),
         TextButton(
           style: ButtonStyle(
             foregroundColor: MaterialStateProperty.all<Color>(Colors.blueAccent),
@@ -23,12 +28,12 @@ class SampleEmpty extends StatelessWidget {
         ),
         TextButton(
           style: ButtonStyle(
-            foregroundColor: MaterialStateProperty.all<Color>(Colors.redAccent),
+            foregroundColor: MaterialStateProperty.all<Color>(Colors.pinkAccent),
           ),
           onPressed: () {
-            context.read<SampleBloc>().add(SampleForceRequestDataFailEvent());
+            context.read<SampleBloc>().add(SampleClearRequestedDataEvent());
           },
-          child: const Text('Force fetch data false'),
+          child: const Text('Clear data'),
         ),
       ],
     );

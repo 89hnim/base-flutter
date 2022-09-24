@@ -5,6 +5,7 @@ import 'package:base_flutter/presentation/sample/widgets/sample_empty.dart';
 import 'package:base_flutter/presentation/sample/widgets/sample_failure.dart';
 import 'package:base_flutter/presentation/sample/widgets/sample_initial.dart';
 import 'package:base_flutter/presentation/sample/widgets/sample_loading.dart';
+import 'package:base_flutter/presentation/sample/widgets/sample_success.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -41,7 +42,11 @@ class SampleView extends StatelessWidget {
               case SampleStatus.loading:
                 return const SampleLoading();
               case SampleStatus.success:
-                return const SampleEmpty();
+                if (state.samples.isEmpty) {
+                  return const SampleEmpty();
+                } else {
+                  return const SampleSuccess();
+                }
               case SampleStatus.failure:
                 return const SampleFailure();
             }

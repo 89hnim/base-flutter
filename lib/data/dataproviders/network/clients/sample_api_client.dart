@@ -1,6 +1,5 @@
 import 'dart:convert';
-import 'dart:developer';
-
+import 'package:base_flutter/utils/string_ext.dart';
 import 'package:base_flutter/utils/json_ext.dart';
 import 'package:dio/dio.dart';
 import 'package:base_flutter/core/network/dio_generator.dart';
@@ -12,6 +11,7 @@ import 'package:flutter/foundation.dart';
 List<SampleDto> parsePhotos(String responseBody) {
   print("parsing $responseBody");
   final parsed = jsonDecode(responseBody).cast<Map<String, dynamic>>();
+  print("parsed $parsed");
   return parsed.map<SampleDto>((json) => SampleDto.fromJson(json)).toList();
 }
 
@@ -21,7 +21,9 @@ class SampleApiClient {
   final Dio _dio;
 
   Future<List<SampleDto>> fetch() async {
-    final response = await _dio.request("/photos");
+    final Response<String> response = await _dio.request("/photos");
+    // final response = await _httpClient
+    //     .get(Uri.parse("https://jsonplaceholder.typicode.com/photos"));
     print("HELLO");
     // return JsonExtensions.parseObjectsCompute<SampleDto>(
     //   JsonParser(
@@ -30,10 +32,8 @@ class SampleApiClient {
     //   ),
     // );
     // var test = compute(parsePhotos, response.data.toString());
-    var test = parsePhotos(response.data.toString());
-    print("HELLO 2");
+    var test = parsePhotos(response.data.orEmpty());
+    print("HELLO 2 $test");
     return test;
   }
-
-
 }
