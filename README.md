@@ -1,92 +1,167 @@
-# Portal
+Base flutter [Work in progress 🚧]
+==================
 
+## Goals
+- Easy for developers to understand, nothing too experimental.
+- Support multiple developers working on the same codebase.
+- Minimize build times.
 
+## Architecture overview
+Use BLoC design pattern
+> Bloc is a design pattern created by Google to help separate business logic from the presentation layer and enable a developer to reuse code more efficiently.
 
-## Getting started
+To archive this, we use [a state management library called Bloc](https://pub.dev/packages/bloc) was created and maintained by Felix Angelo.<br>
+The app has two layers: ```Data layer``` and ```UI layer``` (called presentation)
+![architecture-overview](docs/images/architecture-overview.png)
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+### Data flow
+The architecture follows a reactive programming model with unidirectional data flow:
+1. User trigger an event (press button on screen .etc.)
+2. The ```View``` will send that event to ```bloc```
+3. ```bloc``` handle the event and request corresponding data from ```repository```
+4. ```repository``` request data from ```data provider```
+5. ```data provider``` is the data source, could from ```cache``` or ```remote```. After got the data, return to ```repository```
+6. ```repository``` could do some logic like sync data and return the requested data to ```bloc```. ```bloc``` updates the state.
+7. While ```view``` is observing ```bloc```, it will receive the state corresponding to the sent event and update the interface
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+### Models mapping
+For best maintainability, I decided to use four types of models in the app:
+1. Cache Entity: model to read & write in cache
+2. Remote DTO: model parsed from network
+3. Domain Model: app model, nearly don't change
+4. Ui Data: display data in ui
 
-## Add your files
+To analyze this approach:
+<br><br><b>Pros:</b>
+- Code is clearer when the model is decoupled by layers
+- Easily maintain the codebase, especially case data from network change too often
+- Ui data helps us to increase performance better 🤫
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+<b>Cons:</b>
+- Need to write more code
 
+## Deep dive into Architecture
+So above is the concept of this architecture. But how is it actually implemented in each layer?
+### (Data Layer) Data Provider
+#### Remote
+![remote-package](docs/images/remote-package.png)
+- Models: Dto models
+- Exceptions: handle all exceptions from server. Example when server response with a incorrect status, such as 404, 503...
+- Clients: call api here, using [Dio](https://pub.dev/packages/dio) for making network request
+```dart
+Future<List<SampleDto>> fetchCompute() async {
+    final Response<String> response = await _dio.request("/photos");
+    return JsonExtensions.parseObjectsCompute<SampleDto>(
+      JsonParser(
+        responseBody: response.data.toString(),
+        fromJson: (json) => SampleDto.fromJson(json),
+      ),
+    );
+  }
 ```
-cd existing_repo
-git remote add origin https://gitlab.id.vin/base-platform/remote-config/fe/portal.git
-git branch -M master
-git push -uf origin master
+The ```JsonExtensions``` is a utility class help convert json to corresponding model in background or not.
+
+#### Cache [Work in progress 🚧]
+
+### (Data Layer) Repository
+Get the data from cache or remote then map to domain model
+```dart
+Future<Result<List<SampleModel>>> fetch() async {
+    return Result.guardFuture(
+      () async => (await _sampleApiClient.fetchCompute()).mapToModel(),
+      _exceptionHandler,
+    );
+  }
+```
+The ```Result.guardFuture()``` simply wraps ```Future``` with try catch. Also we have ```Result.guard()``` does the samething but not ```Future```. See more in ```result.dart``` class
+<br>The ```mapToModel``` is an extension, put in the Dto model
+```dart
+extension _Mapper on SampleDto {
+  SampleModel? mapToModel() {
+    if (id == null || albumId == null) return null;
+    return SampleModel(
+      id: id!,
+      albumId: albumId!,
+      title: title.orEmpty(),
+      url: url.orEmpty(),
+      thumbnailUrl: thumbnailUrl.orEmpty(),
+    );
+  }
+}
+
+extension ListMapper on List<SampleDto> {
+  List<SampleModel> mapToModel() {
+    return map((e) => e.mapToModel()).whereType<SampleModel>().toList();
+  }
+}
 ```
 
-## Integrate with your tools
+### Presentation Layer
+This layer doesn't have much to say. You can deploy as you like, but for consistency try to follow the following package organization:
+![view-package](docs/images/view-package.png)
+- feature_name/
+  - ```logic/``` cubits, blocks, event 
+  - ```models/``` ui data
+  - ```view/``` your screen/page (for consistency use ```page``` for naming view)
+  - ```widgets/``` widgets use for page
+  
+## Navigation
+Use ```onGenerateRoute``` for setting up routes. All available routes will be declared in ```AppRouter```.
+<br>Add new route:
+```dart
+/// create const route's name
+ static const String sample = 'sample';
+ /// declare in onGenerateRoute
+ static Route onGenerateRoute(RouteSettings settings) {
+ ...
+    case sample:
+      return MaterialPageRoute(
+        builder: (_) => const SamplePage(),
+      );
+  ...
+  }
+ ```
+ Navigate:
+ ```dart
+Navigator.of(context).pushNamed(AppRouter.sample);
+ ```
 
-- [ ] [Set up project integrations](https://gitlab.id.vin/base-platform/remote-config/fe/portal/-/settings/integrations)
+## Design system [Work in progress 🚧]
+DS organization in ```core/ui``` folder.
 
-## Collaborate with your team
+## Naming convention
+- Follow [offical guidance](https://dart.dev/guides/language/effective-dart/style)
+- ```package``` try not use "_". Example ```home_tracking``` can be replaced with ```tracking/home```
+- Util extension end with ```_ext```. Example ```json_ext```
+- bloc event end with ```Event```. Example ```SampleRequestDataEvent```, ```SampleClearRequestedDataEvent```
+- bloc state end with ```State```. Example ```SampleState```, ```SampleLoadingState```
+- models:
+  - domain model: end with Model (SampleModel)
+  - remote model: end with Dto (SampleDto)
+  - cache model: end with Entity (SampleEntity)
+  - ui model: end with UiData (SampleUiData)
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+## Build
+get dependencies
+```dart
+flutter packages get
+```
 
-## Test and Deploy
+run build runner for generating needed classes
+```dart
+ flutter pub run build_runner build --delete-conflicting-outputs  
+```
 
-Use the built-in continuous integration in GitLab.
-
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
-
-***
-
-# Editing this README
-
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+## Todo
+- [x] Base data flow using BLoC pattern
+- [x] Basic usages of bloc to manage app state
+- [x] Handle exceptions from API
+- [x] [Mobile] Json decode in background
+- [ ] [Web] Json decode in background
+- [ ] Implement cache data provider
+- [x] Design system: snackbar
+- [ ] Design system: typography
+- [ ] Design system: colors, theme
+- [ ] Add useful extensions for String based on kotlin
+- [ ] Add useful extensions for List based on kotlin
+- [ ] Refactoring a lotttt when I have more experience with Flutter 🥺
