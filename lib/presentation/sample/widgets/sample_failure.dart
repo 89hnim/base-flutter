@@ -1,10 +1,11 @@
-import 'package:base_flutter/presentation/sample/logic/sample_bloc.dart';
-import 'package:base_flutter/presentation/sample/logic/sample_event.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SampleFailure extends StatelessWidget {
-  const SampleFailure({super.key});
+  const SampleFailure(
+      {super.key, required this.error, required this.onRefresh});
+
+  final String error;
+  final Function onRefresh;
 
   @override
   Widget build(BuildContext context) {
@@ -12,17 +13,17 @@ class SampleFailure extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         const Text('Fetch data fail', style: TextStyle(fontSize: 16)),
-        Builder(builder: (context) {
-          final error =
-              context.select((SampleBloc bloc) => bloc.state.errorMessage);
-          return Text(error);
-        }),
+        Text("Reason: $error",
+            style: const TextStyle(fontSize: 18, color: Colors.red)),
+        const SizedBox(height: 16),
         TextButton(
           style: ButtonStyle(
-            foregroundColor: MaterialStateProperty.all<Color>(Colors.blueAccent),
+            foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+            backgroundColor:
+                MaterialStateProperty.all<Color>(Colors.blueAccent),
           ),
           onPressed: () {
-            context.read<SampleBloc>().add(SampleRequestDataEvent());
+            onRefresh();
           },
           child: const Text('Refresh data'),
         ),

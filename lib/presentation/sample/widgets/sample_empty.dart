@@ -1,10 +1,11 @@
-import 'package:base_flutter/presentation/sample/logic/sample_bloc.dart';
-import 'package:base_flutter/presentation/sample/logic/sample_event.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SampleEmpty extends StatelessWidget {
-  const SampleEmpty({super.key});
+  const SampleEmpty(
+      {super.key, required this.onRefresh, required this.onForceFailure});
+
+  final Function onRefresh;
+  final Function onForceFailure;
 
   @override
   Widget build(BuildContext context) {
@@ -12,23 +13,27 @@ class SampleEmpty extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         const Text('There is no data at all', style: TextStyle(fontSize: 16)),
+        const SizedBox(height: 16),
         TextButton(
           style: ButtonStyle(
-            foregroundColor: MaterialStateProperty.all<Color>(Colors.blueAccent),
+            foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+            backgroundColor:
+                MaterialStateProperty.all<Color>(Colors.blueAccent),
           ),
           onPressed: () {
-            context.read<SampleBloc>().add(SampleRequestDataEvent());
+            onRefresh;
           },
           child: const Text('Refresh data'),
         ),
         TextButton(
           style: ButtonStyle(
-            foregroundColor: MaterialStateProperty.all<Color>(Colors.redAccent),
+            foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+            backgroundColor: MaterialStateProperty.all<Color>(Colors.redAccent),
           ),
           onPressed: () {
-            context.read<SampleBloc>().add(SampleForceRequestDataFailEvent());
+            onForceFailure();
           },
-          child: const Text('Force fetch data false'),
+          child: const Text('Force fetch data failure'),
         ),
       ],
     );

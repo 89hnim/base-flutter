@@ -41,7 +41,6 @@ dependencies:
 
   # network
   dio: ^4.0.6
-  dio_http2_adapter: ^2.0.0
   pretty_dio_logger: ^1.1.1
 
   # google authentication

@@ -17,7 +17,7 @@ class SampleRepository {
 
   Future<Result<List<SampleModel>>> fetch() async {
     return Result.guardFuture(
-      () async => (await _sampleApiClient.fetch()).mapToModel(),
+      () async => (await _sampleApiClient.fetchCompute()).mapToModel(),
       _exceptionHandler,
     );
   }

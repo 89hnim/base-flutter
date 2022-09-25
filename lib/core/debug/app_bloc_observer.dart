@@ -23,13 +23,13 @@ class AppBlocObserver extends BlocObserver {
   @override
   void onTransition(Bloc bloc, Transition transition) {
     super.onTransition(bloc, transition);
-    log('onTransition ${transition.currentState} ====> ${transition.nextState}');
+    // log('onTransition ${transition.currentState} ====> ${transition.nextState}');
   }
 
   @override
   void onChange(BlocBase bloc, Change change) {
     super.onChange(bloc, change);
-    log('onChange ${change.currentState} ====> ${change.nextState}');
+    // log('onChange ${change.currentState} ====> ${change.nextState}');
   }
 
   @override

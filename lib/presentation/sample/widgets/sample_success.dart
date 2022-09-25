@@ -1,41 +1,67 @@
-import 'package:base_flutter/presentation/sample/logic/sample_bloc.dart';
-import 'package:base_flutter/presentation/sample/logic/sample_event.dart';
+import 'package:base_flutter/presentation/sample/models/sample_ui_data.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SampleSuccess extends StatelessWidget {
-  const SampleSuccess({super.key});
+  const SampleSuccess({
+    super.key,
+    required this.samples,
+    required this.onRefresh,
+    required this.onClear,
+  });
+
+  final List<SampleUiData> samples;
+  final Function onRefresh;
+  final Function onClear;
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisSize: MainAxisSize.min,
       children: [
-        const Text('Fetch data success', style: TextStyle(fontSize: 16)),
-        Builder(builder: (context) {
-          final samples =
-              context.select((SampleBloc bloc) => bloc.state.samples);
-          return Text(samples.toString());
-        }),
         TextButton(
           style: ButtonStyle(
-            foregroundColor: MaterialStateProperty.all<Color>(Colors.blueAccent),
+            foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+            backgroundColor:
+                MaterialStateProperty.all<Color>(Colors.blueAccent),
           ),
           onPressed: () {
-            context.read<SampleBloc>().add(SampleRequestDataEvent());
+            onRefresh();
           },
           child: const Text('Refresh data'),
         ),
         TextButton(
           style: ButtonStyle(
-            foregroundColor: MaterialStateProperty.all<Color>(Colors.pinkAccent),
+            foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+            backgroundColor:
+                MaterialStateProperty.all<Color>(Colors.pinkAccent),
           ),
           onPressed: () {
-            context.read<SampleBloc>().add(SampleClearRequestedDataEvent());
+            onClear();
           },
           child: const Text('Clear data'),
         ),
+        Flexible(
+          child: SampleList(samples: samples),
+        )
       ],
+    );
+  }
+}
+
+class SampleList extends StatelessWidget {
+  const SampleList({super.key, required this.samples});
+
+  final List<SampleUiData> samples;
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.builder(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+      ),
+      itemCount: samples.length,
+      itemBuilder: (context, index) {
+        return Image.network(samples[index].thumbnailUrl);
+      },
     );
   }
 }

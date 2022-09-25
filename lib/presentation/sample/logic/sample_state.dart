@@ -1,9 +1,9 @@
-import 'package:base_flutter/data/models/sample_model.dart';
+import 'package:base_flutter/presentation/sample/models/sample_ui_data.dart';
 import 'package:equatable/equatable.dart';
 
 enum SampleStatus { initial, loading, success, failure }
 
-class SampleState extends Equatable{
+class SampleState extends Equatable {
   const SampleState({
     this.status = SampleStatus.initial,
     this.samples = const [],
@@ -11,7 +11,7 @@ class SampleState extends Equatable{
   });
 
   final SampleStatus status;
-  final List<SampleModel> samples;
+  final List<SampleUiData> samples;
   final String errorMessage;
 
   @override

@@ -17,6 +17,7 @@ class JsonExtensions {
   }
 
   /// parse json array in background
+  /// https://docs.flutter.dev/cookbook/networking/background-parsing
   static Future<List<T>> parseObjectsCompute<T>(JsonParser<T> parser) {
     return compute(JsonExtensions.parseObjects<T>, parser);
   }

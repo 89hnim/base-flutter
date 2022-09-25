@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-class SampleModel extends Equatable{
+class SampleModel extends Equatable {
   final int id;
   final int albumId;
   final String title;
