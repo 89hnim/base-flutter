@@ -45,15 +45,15 @@ So above is the concept of this architecture. But how is it actually implemented
 ### (Data Layer) Data Provider
 #### Remote
 ![remote-package](docs/images/remote-package.png)
-- Models: Dto models
-- Exceptions: handle all exceptions from server. Example when server response with a incorrect status, such as 404, 503...
-- Clients: call api here, using [Dio](https://pub.dev/packages/dio) for making network request
+- models: Dto models
+- exceptions: handle all exceptions from server. Example when server response with a incorrect status, such as 404, 503...
+- apis: call api here, using [Dio](https://pub.dev/packages/dio) for making network request
 ```dart
 Future<List<SampleDto>> fetchCompute() async {
     final Response<String> response = await _dio.request("/photos");
-    return JsonExtensions.parseObjectsCompute<SampleDto>(
+    return JsonExtensions.toObjectsCompute<SampleDto>(
       JsonParser(
-        responseBody: response.data.toString(),
+        raw: response.data.toString(),
         fromJson: (json) => SampleDto.fromJson(json),
       ),
     );
@@ -61,7 +61,27 @@ Future<List<SampleDto>> fetchCompute() async {
 ```
 The ```JsonExtensions``` is a utility class help convert json to corresponding model in background or not.
 
-#### Cache [Work in progress 🚧]
+#### Cache
+- models: entity models
+- storage: get cache data here. Currently I'm prefer using SharedPreferences, because web platform doesn't support sqlite.
+```dart
+/// save data in json format
+  Future<bool> saveSamples(List<SampleEntity> samples) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return await prefs.setString(_samplesKey, jsonEncode(samples));
+  }
+  
+  /// get data from cache
+  Future<List<SampleEntity>> getSamples() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return JsonExtensions.toObjects(
+      JsonParser(
+        raw: prefs.getString(_samplesKey).orEmpty(),
+        fromJson: (json) => SampleEntity.fromJson(json),
+      ),
+    );
+  }
+```
 
 ### (Data Layer) Repository
 Get the data from cache or remote then map to domain model
@@ -73,7 +93,7 @@ Future<Result<List<SampleModel>>> fetch() async {
     );
   }
 ```
-The ```Result.guardFuture()``` simply wraps ```Future``` with try catch. Also we have ```Result.guard()``` does the samething but not ```Future```. See more in ```result.dart``` class
+The ```Result.guardFuture()``` simply wraps ```Future``` with try catch. Also we have ```Result.guard()``` does the same thing but not ```Future```. See more in ```result.dart``` class
 <br>The ```mapToModel``` is an extension, put in the Dto model
 ```dart
 extension _Mapper on SampleDto {
@@ -158,7 +178,7 @@ run build runner for generating needed classes
 - [x] Handle exceptions from API
 - [x] [Mobile] Json decode in background
 - [ ] [Web] Json decode in background
-- [ ] Implement cache data provider
+- [x] Implement cache data provider
 - [x] Design system: snackbar
 - [ ] Design system: typography
 - [ ] Design system: colors, theme

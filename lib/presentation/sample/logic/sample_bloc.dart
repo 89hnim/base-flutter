@@ -21,7 +21,7 @@ class SampleBloc extends Bloc<SampleEvent, SampleState> {
   ) async {
     emit(const SampleState(status: SampleStatus.loading));
 
-    var result = await _sampleRepository.fetch();
+    var result = await _sampleRepository.fetchWithCache();
     if (result.isSuccess) {
       emit(
         SampleState(

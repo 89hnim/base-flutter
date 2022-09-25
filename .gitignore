@@ -1,6 +1,8 @@
 # Created by https://www.toptal.com/developers/gitignore/api/git,dart,flutter,androidstudio
 # Edit at https://www.toptal.com/developers/gitignore?templates=git,dart,flutter,androidstudio
 
+.idea/
+
 ### Dart ###
 # See https://www.dartlang.org/guides/libraries/private-files
 

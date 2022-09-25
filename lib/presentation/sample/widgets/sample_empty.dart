@@ -21,7 +21,7 @@ class SampleEmpty extends StatelessWidget {
                 MaterialStateProperty.all<Color>(Colors.blueAccent),
           ),
           onPressed: () {
-            onRefresh;
+            onRefresh();
           },
           child: const Text('Refresh data'),
         ),

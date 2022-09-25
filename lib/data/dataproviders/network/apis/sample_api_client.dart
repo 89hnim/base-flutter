@@ -12,9 +12,9 @@ class SampleApiClient {
   /// should use only if large json, because compute() cost too
   Future<List<SampleDto>> fetchCompute() async {
     final Response<String> response = await _dio.request("/photos");
-    return JsonExtensions.parseObjectsCompute<SampleDto>(
+    return JsonExtensions.toObjectsCompute<SampleDto>(
       JsonParser(
-        responseBody: response.data.toString(),
+        raw: response.data.toString(),
         fromJson: (json) => SampleDto.fromJson(json),
       ),
     );
@@ -22,9 +22,9 @@ class SampleApiClient {
 
   Future<List<SampleDto>> fetch() async {
     final Response<String> response = await _dio.request("/photos");
-    return JsonExtensions.parseObjects<SampleDto>(
+    return JsonExtensions.toObjects<SampleDto>(
       JsonParser(
-        responseBody: response.data.toString(),
+        raw: response.data.toString(),
         fromJson: (json) => SampleDto.fromJson(json),
       ),
     );
