@@ -50,12 +50,10 @@ So above is the concept of this architecture. But how is it actually implemented
 - apis: call api here, using [Dio](https://pub.dev/packages/dio) for making network request
 ```dart
 Future<List<SampleDto>> fetchCompute() async {
-    final Response<String> response = await _dio.request("/photos");
+    final Response response = await _dio.request("/photos");
     return JsonExtensions.toObjectsCompute<SampleDto>(
-      JsonParser(
-        raw: response.data.toString(),
-        fromJson: (json) => SampleDto.fromJson(json),
-      ),
+        response.data.toString(),
+        (json) => SampleDto.fromJson(json),
     );
   }
 ```
@@ -75,10 +73,8 @@ The ```JsonExtensions``` is a utility class help convert json to corresponding m
   Future<List<SampleEntity>> getSamples() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return JsonExtensions.toObjects(
-      JsonParser(
-        raw: prefs.getString(_samplesKey).orEmpty(),
-        fromJson: (json) => SampleEntity.fromJson(json),
-      ),
+        prefs.getString(_samplesKey).orEmpty(),
+        (json) => SampleEntity.fromJson(json),
     );
   }
 ```
@@ -178,7 +174,7 @@ run build runner for generating needed classes
 - [x] Handle exceptions from API
 - [x] [Mobile] Json decode in background
 - [ ] [Web] Json decode in background
-- [x] Implement cache data provider
+- [x] Network interceptor
 - [x] Design system: snackbar
 - [ ] Design system: typography
 - [ ] Design system: colors, theme

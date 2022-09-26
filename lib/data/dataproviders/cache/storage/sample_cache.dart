@@ -14,10 +14,8 @@ class SampleCache {
   Future<List<SampleEntity>> getSamples() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return JsonExtensions.toObjects(
-      JsonParser(
-        raw: prefs.getString(_samplesKey).orEmpty(),
-        fromJson: (json) => SampleEntity.fromJson(json),
-      ),
+      prefs.getString(_samplesKey).orEmpty(),
+      (json) => SampleEntity.fromJson(json),
     );
   }
 
